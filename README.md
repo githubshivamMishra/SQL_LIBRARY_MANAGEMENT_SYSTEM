@@ -39,7 +39,9 @@ The database consists of six interconnected tables:
 
 ### Entity Relationship Diagram (ERD)
 
-![Library Database Structure](images/library-db-structure.png)
+
+  <img width="1740" height="1282" alt="Library_db-Schema" src="https://github.com/user-attachments/assets/8d108228-c532-4ec4-bb57-abc1bc5f0de4" />
+
 
 ### Database Relationships
 
