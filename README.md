@@ -63,8 +63,10 @@ The project includes implementation of:
 #### Create
 
 ```sql
-INSERT INTO books
-VALUES (...);
+INSERT INTO books(isbn, book_title, category, rental_price, status, author, publisher) 
+VALUES
+('978-0-553-29698-2', 'The Catcher in the Rye', 'Classic', 7.00, 'yes', 'J.D. Salinger', 'Little, Brown and Company'),
+('978-0-330-25864-8', 'Animal Farm', 'Classic', 5.50, 'yes', 'George Orwell', 'Penguin Books');
 ```
 
 #### Read
@@ -137,30 +139,143 @@ This project demonstrates the use of:
 
 ---
 
-# 📊 Business Questions Solved
+# 📊 SQL Tasks & Business Problems Solved
 
-### Book Analysis
+The project includes several real-world SQL scenarios designed to improve database management and analytical skills.
 
-* Which category has the highest number of books?
-* Which books are issued most frequently?
-* Which books are currently available?
+### 1. Overdue Book Identification
 
-### Member Analysis
+* Identified members who have not returned books within the allowed 30-day period.
+* Calculated the number of days overdue for each issued book.
 
-* Who are the most active members?
-* Which members registered recently?
+### 2. Book Status Management
 
-### Revenue Analysis
+* Updated book availability status automatically when books were returned.
+* Ensured accurate inventory tracking within the library system.
 
-* Total rental income generated.
-* Revenue by book category.
-* Revenue trends across branches.
+```sql
+ROP PROCEDURE IF EXISTS add_return_stat;
 
-### Operational Analysis
+create procedure add_return_stat(p_return_id varchar(20),p_issued_id varchar(20))
+begin
+	
+	declare i_isbn varchar(40);
+	declare	i_name varchar(75);
+	
+	-- sql statement
+	-- insert into return_status table 
+	insert into return_status(return_id,issued_id,return_date)
+	values(p_return_id,p_issued_id,current_date);
+	
 
-* Books issued but not returned.
-* Overdue returns.
-* Employee-wise issue records.
+	select 
+		issued_book_isbn,
+		issued_book_name
+		into i_isbn,i_name
+	from issued_status
+	where issued_id=p_issued_id;
+	
+
+	update books
+	set status='yes'
+	where isbn=i_isbn;
+	
+	select concat('Thnak you for returning the book :',i_name ) as message;
+	
+end;
+
+call add_return_stat('RS141','IS135');
+
+```
+ 
+
+### 3. Branch Performance Analysis
+
+Generated branch-level performance reports including:
+
+* Total books issued
+* Total books returned
+* Total rental revenue generated
+
+### 4. Active Member Identification (CTAS)
+
+* Created a separate table containing members who issued at least one book within the last two months.
+* Demonstrated the use of CREATE TABLE AS SELECT (CTAS).
+
+### 5. Employee Performance Analysis
+
+* Identified the top 3 employees who processed the highest number of book issues.
+* Included branch-level employee performance tracking.
+
+### 6. Stored Procedure for Book Issuance
+
+* Developed a stored procedure to automate book issuance.
+* Checked book availability before issuing.
+* Updated book status dynamically.
+* Returned appropriate messages when books were unavailable.
+
+```sql
+drop PROCEDURE  if exists book_status;
+
+create procedure book_status(p_issued_id varchar(30),p_issued_member_id varchar(40),p_issued_book_isbn varchar(40),p_emp_id varchar(45))
+
+
+
+begin
+	declare v_status varchar(30);
+	-- sql statement 
+	select 
+		status
+		into v_status
+	from books
+	where isbn=p_issued_book_isbn;
+	
+	IF v_status='yes' THEN
+	-- insert into issued_status table
+		
+			insert into issued_status(issued_id,issued_member_id,issued_date,issued_book_isbn,issued_emp_id)
+			values(p_issued_id,p_issued_member_id,CURRENT_DATE(),p_issued_book_isbn,p_emp_id);
+		
+	update books
+	set status='no'
+	where isbn=p_issued_book_isbn;
+	
+		select 'your requested book issued successfully',p_issued_book_isbn;
+		
+	ELSE	
+		
+		select 'sorry your requested book is not available:',p_issued_book_isbn;
+		
+	END IF;
+	
+	
+end;
+
+call book_status('IS301','C106','978-0-385-33312-0','E104');
+
+```
+
+  
+
+### 7. Overdue Books & Fine Calculation (CTAS)
+
+* Created a table containing members with overdue books.
+* Calculated overdue fines based on a daily penalty rate.
+* Generated member-level overdue summaries.
+
+### 8. Advanced SQL Operations
+
+Applied advanced SQL concepts including:
+
+* Joins
+* Aggregate Functions
+* Group By
+* Subqueries
+* Common Table Expressions (CTEs)
+* Stored Procedures
+* CTAS
+* Date Functions
+* Conditional Logic
 
 ---
 
